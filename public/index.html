@@ -4,12 +4,21 @@
   <meta charset="UTF-8">
   <title>Transcript Search</title>
   <script src="https://www.youtube.com/iframe_api"></script>
+  <style>
+    #playerContainer {
+      display: none;
+    }
+  </style>
 </head>
 <body>
   <h1>Transcript Search</h1>
+  <div id="stats">Searching 12,621,357 words in 1,377 hours of 1,925 videos</div>
   <input type="text" id="searchTerm" placeholder="Enter search term">
   <button onclick="search()">Search</button>
-  <div id="player"></div>
+  <div id="searchSummary"></div>
+  <div id="playerContainer">
+    <div id="player"></div>
+  </div>
   <div id="results"></div>
 
   <script>
@@ -19,7 +28,7 @@
       player = new YT.Player('player', {
         height: '390',
         width: '640',
-        videoId: '', // default videoId
+        videoId: '',
         events: {
           'onReady': onPlayerReady,
         }
@@ -33,19 +42,43 @@
     async function search() {
       const searchTerm = document.getElementById('searchTerm').value;
       const response = await fetch('/search?search=' + searchTerm);
-      const data = await response.json();
+      const { results, summary } = await response.json();
       const resultsDiv = document.getElementById('results');
-      resultsDiv.innerHTML = data.map(result => 
-        `<div onclick="goToTimestamp('${result.videoId}', ${result.timestamp})">
-          <strong>Video:</strong> ${result.videoId} <br>
-          <strong>Timestamp:</strong> ${new Date(result.timestamp * 1000).toISOString().substr(11, 8)} <br>
-          <strong>Context:</strong> ${result.context}
-        </div><br>`
-      ).join('');
+      const searchSummary = document.getElementById('searchSummary');
+
+      // Update search summary
+      searchSummary.textContent = `Found ${summary.totalQuotes} quotes in ${summary.totalVideos} videos`;
+
+      // Show player after search
+      document.getElementById('playerContainer').style.display = 'block';
+
+      // Clear previous results
+      resultsDiv.innerHTML = '';
+
+      // Show grouped results
+      Object.keys(results).forEach(videoId => {
+        const videoResults = results[videoId];
+        const firstResult = videoResults[0];
+        const resultHTML = videoResults.map(result => `
+          <div onclick="goToTimestamp('${result.videoId}', ${result.timestamp})">
+            <strong>Timestamp:</strong> ${new Date(result.timestamp * 1000).toISOString().substr(11, 8)} <br>
+            <strong>Context:</strong> ${result.context}
+          </div>
+        `).join('<br>');
+
+        resultsDiv.innerHTML += `
+          <div>
+            <h2>${firstResult.title}</h2>
+            <img src="${firstResult.thumbnail_url}" alt="Thumbnail for ${firstResult.title}">
+            ${resultHTML}
+          </div>
+          <hr>
+        `;
+      });
     }
 
     function goToTimestamp(videoId, timestamp) {
-      player.loadVideoById({videoId: videoId, startSeconds: timestamp / 1000});
+      player.loadVideoById({ videoId: videoId, startSeconds: timestamp / 1000 });
     }
   </script>
 </body>
