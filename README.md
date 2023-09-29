@@ -1,6 +1,6 @@
 # TranscriptSearch
 
-![image](https://github.com/tom-leamon/TranscriptSearch/assets/18317587/58bec097-129c-43ba-84f1-2f62ce2de4c3)
+![image](https://github.com/tom-leamon/TranscriptSearch/assets/18317587/d44001b1-3d35-4677-af99-a994cc95f194)
 
 TranscriptSearch is a web application that allows you to search within YouTube video transcripts, share timestamped links, and cue videos at specific points.
 
