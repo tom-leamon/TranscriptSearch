@@ -1,6 +1,6 @@
 # TranscriptSearch
 
-![image](https://github.com/tom-leamon/TranscriptSearch/assets/18317587/d44001b1-3d35-4677-af99-a994cc95f194)
+![image](https://github.com/tom-leamon/TranscriptSearch/assets/18317587/8dfb5f8b-5378-4d45-b163-c16d8d2620e4)
 
 TranscriptSearch makes it easy to index and search video transcripts from entire YouTube channels, then easily play back the matches.
 
