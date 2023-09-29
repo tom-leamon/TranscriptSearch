@@ -1,3 +1,12 @@
+async function fetchStats() {
+  const response = await fetch('/stats')
+  const stats = await response.json()
+  const statsDiv = document.getElementById('stats')
+  
+  const totalHours = (stats.totalSeconds / 3600).toFixed(0)  // Convert seconds to hours
+  statsDiv.textContent = `Searching ${stats.totalWords.toLocaleString()} words in ${totalHours} hours of ${stats.totalVideos} videos`
+}
+
 document.addEventListener('DOMContentLoaded', function() {
   const urlParams = new URLSearchParams(window.location.search)
   const query = urlParams.get('search')
@@ -6,6 +15,8 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('searchTerm').value = query
     search()
   }
+
+  fetchStats()
 })
 
 var player
@@ -53,10 +64,11 @@ async function search() {
 
   Object.keys(results).forEach(videoId => {
     const videoResults = results[videoId]
+    console.log(videoResults)
     const firstResult = videoResults[0]
     const resultHTML = videoResults.map(result => `
       <div onclick="goToTimestamp('${result.videoId}', ${result.timestamp})">
-        <strong>Timestamp:</strong> ${new Date(result.timestamp * 1000).toISOString().substr(11, 8)} <br>
+        <strong>Timestamp:</strong> ${new Date(result.timestamp).toISOString().substr(11, 8)} <br>
         <strong>Context:</strong> ${result.context}
       </div>
     `).join('<br>')
@@ -64,6 +76,7 @@ async function search() {
     resultsDiv.innerHTML += `
       <div>
         <h2>${firstResult.title}</h2>
+        <p>Published on: ${new Date(firstResult.datePublished).toLocaleDateString()}</p>  <!-- Display publication date -->
         <img src="${firstResult.thumbnail_url}" alt="Thumbnail for ${firstResult.title}">
         ${resultHTML}
       </div>

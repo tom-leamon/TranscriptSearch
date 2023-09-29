@@ -8,38 +8,43 @@ const sqlite3_1 = __importDefault(require("sqlite3"));
 const YT = require('youtube-transcript');
 const path_1 = __importDefault(require("path"));
 // @ts-ignore
-const youtube_metadata_from_url_1 = require("youtube-metadata-from-url");
+var fetchVideoInfo = require('updated-youtube-info');
 const app = (0, express_1.default)();
 const db = new sqlite3_1.default.Database('transcripts.db');
 // Setup database
 // Setup database
 db.serialize(() => {
-    db.run('CREATE TABLE IF NOT EXISTS transcripts (videoId TEXT UNIQUE, transcript TEXT, title TEXT, url TEXT, thumbnail_url TEXT)');
-    db.run('CREATE TABLE IF NOT EXISTS stats (totalWords INTEGER, totalHours REAL, totalVideos INTEGER)');
+    db.run('CREATE TABLE IF NOT EXISTS transcripts (videoId TEXT UNIQUE, transcript TEXT, title TEXT, url TEXT, thumbnail_url TEXT, datePublished TEXT, duration INTEGER)');
+    db.run('CREATE TABLE IF NOT EXISTS stats (totalWords INTEGER, totalSeconds INTEGER, totalVideos INTEGER)');
     db.run('INSERT OR IGNORE INTO stats VALUES (0, 0, 0)');
 });
 // Function to Fetch and Store Transcript
+function sleep(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
 async function fetchAndStoreTranscripts(videoUrls) {
+    const totalVideos = videoUrls.length;
+    let processedVideos = 0;
+    const startTime = Date.now();
     for (let url of videoUrls) {
         const videoId = url.split('v=')[1];
+        const processStartTime = Date.now();
         try {
             // Check if videoId already exists in the database
             db.get('SELECT videoId FROM transcripts WHERE videoId = ?', [videoId], async (err, row) => {
                 if (!row) { // If not found, then insert and update stats
                     const transcript = await YT.YoutubeTranscript.fetchTranscript(url);
-                    const videoData = await (0, youtube_metadata_from_url_1.metadata)(url);
+                    console.log(`Transcript fetched for video ${videoId}.`); // Logging after fetching transcript
+                    const videoData = await fetchVideoInfo(videoId);
                     let wordCount = 0;
-                    let timeCount = 0;
                     transcript.forEach((entry) => {
                         wordCount += entry.text.split(' ').length;
-                        timeCount += entry.duration;
                     });
-                    const hours = timeCount / 3600;
                     // Update stats
-                    db.run(`UPDATE stats SET totalWords = totalWords + ?, totalHours = totalHours + ?, totalVideos = totalVideos + 1`, [wordCount, hours]);
+                    db.run(`UPDATE stats SET totalWords = totalWords + ?, totalSeconds = totalSeconds + ?, totalVideos = totalVideos + 1`, [wordCount, videoData.duration]);
                     // Store transcript and metadata
-                    const stmt = db.prepare('INSERT OR REPLACE INTO transcripts VALUES (?, ?, ?, ?, ?)');
-                    stmt.run(videoId, JSON.stringify(transcript), videoData.title, url, videoData.thumbnail_url);
+                    const stmt = db.prepare('INSERT OR REPLACE INTO transcripts VALUES (?, ?, ?, ?, ?, ?, ?)');
+                    stmt.run(videoId, JSON.stringify(transcript), videoData.title, url, videoData.thumbnailUrl, videoData.datePublished, videoData.duration);
                     stmt.finalize();
                 }
             });
@@ -47,10 +52,18 @@ async function fetchAndStoreTranscripts(videoUrls) {
         catch (error) {
             console.error('Error fetching data:', error);
         }
+        processedVideos++;
+        const processEndTime = Date.now();
+        const timeTakenPerVideo = (processEndTime - processStartTime) / 1000;
+        const estimatedRemainingTime = timeTakenPerVideo * (totalVideos - processedVideos);
+        console.log(`Processed ${processedVideos}/${totalVideos} videos. Estimated time remaining: ${estimatedRemainingTime.toFixed(2)} seconds.`);
+        await sleep(6000); // Adding a delay of 6 seconds to comply with rate limiting
     }
+    const endTime = Date.now();
+    console.log(`Total processing time: ${(endTime - startTime) / 1000} seconds.`);
 }
 app.get('/search', (req, res) => {
-    const searchTerm = req.query.search;
+    const searchTerm = req.query.search.toLowerCase(); // Convert searchTerm to lowercase
     const query = 'SELECT * FROM transcripts';
     db.all(query, [], (err, rows) => {
         if (err) {
@@ -64,7 +77,7 @@ app.get('/search', (req, res) => {
             const transcript = JSON.parse(row.transcript);
             let videoHasQuote = false;
             transcript.forEach((entry, index) => {
-                if (entry.text.includes(searchTerm)) {
+                if (entry.text.toLowerCase().includes(searchTerm)) { // Convert entry.text to lowercase
                     videoHasQuote = true;
                     totalQuotes++;
                     const contextStart = Math.max(0, index - 5);
@@ -75,7 +88,8 @@ app.get('/search', (req, res) => {
                         timestamp: entry.offset,
                         context: context.replace(new RegExp(searchTerm, 'gi'), `<b>${searchTerm}</b>`),
                         title: row.title,
-                        thumbnail_url: row.thumbnail_url
+                        thumbnail_url: row.thumbnail_url,
+                        datePublished: row.datePublished // Include datePublished field
                     };
                     if (!results[row.videoId]) {
                         results[row.videoId] = [];
@@ -110,7 +124,7 @@ app.get('/stats', (req, res) => {
 const videoUrls = [
     'https://www.youtube.com/watch?v=2H_0CM9Fa6A',
 ];
-// fetchAndStoreTranscripts(videoUrls);
+fetchAndStoreTranscripts(videoUrls);
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
 });
