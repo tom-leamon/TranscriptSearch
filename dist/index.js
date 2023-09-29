@@ -98,10 +98,19 @@ app.use(express_1.default.static(path_1.default.join(__dirname, '..', 'public'))
 app.get('/', (req, res) => {
     res.sendFile(path_1.default.join(__dirname, '..', 'public', 'index.html'));
 });
+app.get('/stats', (req, res) => {
+    db.get('SELECT * FROM stats', [], (err, row) => {
+        if (err) {
+            res.status(500).send('Internal Server Error');
+            return;
+        }
+        res.json(row);
+    });
+});
 const videoUrls = [
     'https://www.youtube.com/watch?v=2H_0CM9Fa6A',
 ];
-fetchAndStoreTranscripts(videoUrls);
+// fetchAndStoreTranscripts(videoUrls);
 app.listen(3000, () => {
     console.log('Server is running on port 3000');
 });

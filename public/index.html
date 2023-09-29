@@ -21,65 +21,6 @@
   </div>
   <div id="results"></div>
 
-  <script>
-    var player;
-
-    function onYouTubeIframeAPIReady() {
-      player = new YT.Player('player', {
-        height: '390',
-        width: '640',
-        videoId: '',
-        events: {
-          'onReady': onPlayerReady,
-        }
-      });
-    }
-
-    function onPlayerReady(event) {
-      event.target.playVideo();
-    }
-
-    async function search() {
-      const searchTerm = document.getElementById('searchTerm').value;
-      const response = await fetch('/search?search=' + searchTerm);
-      const { results, summary } = await response.json();
-      const resultsDiv = document.getElementById('results');
-      const searchSummary = document.getElementById('searchSummary');
-
-      // Update search summary
-      searchSummary.textContent = `Found ${summary.totalQuotes} quotes in ${summary.totalVideos} videos`;
-
-      // Show player after search
-      document.getElementById('playerContainer').style.display = 'block';
-
-      // Clear previous results
-      resultsDiv.innerHTML = '';
-
-      // Show grouped results
-      Object.keys(results).forEach(videoId => {
-        const videoResults = results[videoId];
-        const firstResult = videoResults[0];
-        const resultHTML = videoResults.map(result => `
-          <div onclick="goToTimestamp('${result.videoId}', ${result.timestamp})">
-            <strong>Timestamp:</strong> ${new Date(result.timestamp * 1000).toISOString().substr(11, 8)} <br>
-            <strong>Context:</strong> ${result.context}
-          </div>
-        `).join('<br>');
-
-        resultsDiv.innerHTML += `
-          <div>
-            <h2>${firstResult.title}</h2>
-            <img src="${firstResult.thumbnail_url}" alt="Thumbnail for ${firstResult.title}">
-            ${resultHTML}
-          </div>
-          <hr>
-        `;
-      });
-    }
-
-    function goToTimestamp(videoId, timestamp) {
-      player.loadVideoById({ videoId: videoId, startSeconds: timestamp / 1000 });
-    }
-  </script>
+  <script src="index.js"></script>
 </body>
 </html>
