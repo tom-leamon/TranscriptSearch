@@ -23,8 +23,8 @@ async function extractYouTubeIDs(filePath) {
     const uniqueYouTubeIDs = Array.from(new Set(youtubeIDs))
     
     // Write the array to a new file
-    await fs.promises.writeFile('output.js', `[\n '${uniqueYouTubeIDs.join("',\n '")}'\n]`)
-    console.log('YouTube IDs have been written to output.js')
+    await fs.promises.writeFile('./src/videoUrls.ts', `export const videoUrls = [\n '${uniqueYouTubeIDs.join("',\n '")}'\n]`)
+    console.log('YouTube IDs have been written to videoUrls.ts')
   }
   catch (error) {
     console.error('An error occurred:', error.message)
@@ -32,4 +32,4 @@ async function extractYouTubeIDs(filePath) {
 }
 
 // Call the function with the path to your HTML file
-extractYouTubeIDs('./test.html')
+extractYouTubeIDs('./youtubechannel.html')

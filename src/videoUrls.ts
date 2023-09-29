@@ -1,4 +1,4 @@
-[
+export const videoUrls = [
  'https://www.youtube.com/watch?v=H1WjDgePsEA',
  'https://www.youtube.com/watch?v=Q2pPzGVzA8M',
  'https://www.youtube.com/watch?v=_pQIzxt1yVw',
