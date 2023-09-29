@@ -8,20 +8,13 @@ async function fetchStats() {
 }
 
 document.addEventListener('DOMContentLoaded', function() {
-  const urlParams = new URLSearchParams(window.location.search)
-  const query = urlParams.get('search')
+  parseUrlParamsAndCueVideo();
+  fetchStats();
+});
 
-  if (query) {
-    document.getElementById('searchTerm').value = query
-    search()
-  }
-
-  fetchStats()
-})
-
-var player
-var playerReady = false
-var firstResultToLoad = null
+var player;
+var playerReady = false;
+var firstResultToLoad = null;
 
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('player', {
@@ -29,9 +22,39 @@ function onYouTubeIframeAPIReady() {
     width: '640',
     videoId: '',
     events: {
-      'onReady': onPlayerReady
+      'onReady': function(event) {
+        playerReady = true;
+        event.target.playVideo();
+        parseUrlParamsAndCueVideo();  // Move this line here to ensure player is ready
+      }
     }
-  })
+  });
+}
+
+function parseUrlParamsAndCueVideo() {
+  // Ensure that both the YouTube player is ready and the DOM content is loaded
+  if (!playerReady || !document.readyState === 'complete') return;
+
+  firstResultToLoad = null;  // Reset firstResultToLoad
+
+  const urlParams = new URLSearchParams(window.location.search);
+  const query = urlParams.get('search');
+
+  if (query) {
+    document.getElementById('searchTerm').value = query;
+    search();
+  }
+
+  const videoId = urlParams.get('videoId');
+  const timestamp = urlParams.get('timestamp');
+
+  if (videoId && timestamp) {
+    firstResultToLoad = { videoId, timestamp: Number(timestamp) };
+    player.cueVideoById({
+      videoId: firstResultToLoad.videoId,
+      startSeconds: firstResultToLoad.timestamp / 1000
+    });
+  }
 }
 
 function onPlayerReady(event) {
@@ -47,8 +70,15 @@ function onPlayerReady(event) {
   event.target.playVideo()
 }
 
+
 async function search() {
   const searchTerm = document.getElementById('searchTerm').value
+  
+  // Update the URL with the search query parameter
+  const currentUrl = new URL(window.location.href)
+  currentUrl.searchParams.set('search', searchTerm)
+  window.history.pushState({}, null, currentUrl.toString())
+
   const response = await fetch('/search?search=' + searchTerm)
   const { results, summary } = await response.json()
   const resultsDiv = document.getElementById('results')
@@ -64,7 +94,6 @@ async function search() {
 
   Object.keys(results).forEach(videoId => {
     const videoResults = results[videoId]
-    console.log(videoResults)
     const firstResult = videoResults[0]
     const resultHTML = videoResults.map(result => `
       <div onclick="goToTimestamp('${result.videoId}', ${result.timestamp})">
@@ -83,7 +112,7 @@ async function search() {
       <hr>
     `
 
-    if (!firstVideoLoaded) {
+    if (!firstVideoLoaded && !firstResultToLoad) {  // Check if firstResultToLoad is already set
       firstResultToLoad = firstResult
       
       if (playerReady) {
@@ -105,4 +134,11 @@ function goToTimestamp(videoId, timestamp) {
   }
 
   player.loadVideoById({ videoId: videoId, startSeconds: timestamp / 1000 })
+
+  // Update URL with query parameters
+  const currentUrl = new URL(window.location.href)
+  currentUrl.searchParams.set('videoId', videoId)
+  currentUrl.searchParams.set('timestamp', timestamp)
+  window.history.pushState({}, null, currentUrl.toString())
+  document.getElementById('player').scrollIntoView();
 }
