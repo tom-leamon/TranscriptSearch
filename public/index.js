@@ -82,9 +82,13 @@ async function search() {
   const response = await fetch('/search?search=' + searchTerm)
   const { results, summary } = await response.json()
   const resultsDiv = document.getElementById('results')
-  const searchSummary = document.getElementById('searchSummary')
+  const stats = document.getElementById('stats')
 
-  searchSummary.textContent = `Found ${summary.totalQuotes} quotes in ${summary.totalVideos} videos`
+  stats.textContent = `Found ${
+      summary.totalQuotes === 1 ? `${summary.totalQuotes} quote` : `${summary.totalQuotes} quotes`
+    } in ${
+      summary.totalVideos === 1 ? `${summary.totalVideos} video` : `${summary.totalVideos} videos`
+  }`;
 
   document.getElementById('playerContainer').style.display = 'flex'
 
@@ -95,20 +99,26 @@ async function search() {
   Object.keys(results).forEach(videoId => {
     const videoResults = results[videoId]
     const firstResult = videoResults[0]
+    console.log(firstResult)
     const resultHTML = videoResults.map(result => `
       <div class="result" onclick="goToTimestamp('${result.videoId}', ${result.timestamp})">
         <div class="timestamp">${new Date(result.timestamp).toISOString().substr(11, 8)}</div><div class="context">${result.context}</div>
       </div>
-    `).join('<br>')
+    `).join('')
 
     resultsDiv.innerHTML += `
       <div class="video">
         <div class="video-header">
-          <h2>${firstResult.title}</h2>
-          <div class="spacer"></div>
-          <div class="date-published">${new Date(firstResult.datePublished).toLocaleDateString()}</div>
+          <a href="https://youtube.com/watch?v=${firstResult.videoId}" target="_blank">
+            <img src="${firstResult.thumbnail_url}" class="preview"/>
+            <h2>${firstResult.title}</h2>
+            <div class="spacer"></div>
+            <div class="date-published">${new Date(firstResult.datePublished).toLocaleDateString()}</div>
+          </a>
+          </div>
+        <div class="results">
+          ${resultHTML}
         </div>
-        ${resultHTML}
       </div>
     `
 
@@ -140,5 +150,4 @@ function goToTimestamp(videoId, timestamp) {
   currentUrl.searchParams.set('videoId', videoId)
   currentUrl.searchParams.set('timestamp', timestamp)
   window.history.pushState({}, null, currentUrl.toString())
-  document.getElementById('player').scrollIntoView();
 }

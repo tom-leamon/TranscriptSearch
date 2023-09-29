@@ -1,10 +1,11 @@
 body {
   background: black;
   color: white;
-  font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+  font-family: "Roboto","Arial",sans-serif;
   font-size: 18px;
   display: flex;
   justify-content: center;
+  letter-spacing: 0.15px;
 }
 
 .center {
@@ -14,7 +15,7 @@ body {
 }
 
 #playerContainer {
-  display: flex;
+  display: none;
   width: 100%;
   justify-content: center;
   margin-bottom: 1rem;
@@ -30,6 +31,7 @@ body {
   bottom: 0;
   left: 0;
   width: 100%;
+  border-radius: .5rem;
 }
 
 
@@ -41,35 +43,58 @@ iframe {
 .timestamp {
   color: lightblue;
   text-decoration: underline;
-  margin-right: .5rem;
+  margin-right: .75rem;
+  line-height: 1.2;
+  width: 72px;
+
+}
+
+.preview {
+  width: 72px;
+  height: 40.5px;
+  margin-right: .75rem;
 }
 
 .match {
-  color: #c00c00;
+  color: lightgreen;
+  font-weight: 600;
 }
 
 .result {
   display: flex;
+  padding: .5rem;
+  border-radius: .5rem;
 }
+.result:hover {
+  background: #2A2A2A;
+  cursor: pointer;
+}
+
 
 .context {
   color: #ccc;
+  line-height: 1.2;
+  font-weight: 400;
 }
 
 .video {
   margin-bottom: 1rem;
 }
 
+
+
 .video-header {
   display: flex;
   align-items: center;
   font-size: 20px;
-  padding: 1rem 0;
+  padding: .5rem;
+  font-weight: 600;
 }
 
 .date-published {
   font-size: 16px;
   color: #666;
+  font-weight: 400;
 }
 
 .spacer {
@@ -81,14 +106,24 @@ h1 {
   font-size: 60px;
   padding: 1rem 0;
   font-weight: 800;
+  margin-bottom: .5rem;
+  text-align: center;
+  color: lightgreen;
+
+}
+
+form {
+  width: 100%;
+  display: flex;
+  gap: .5rem;
 }
 
 input[type=text] {
-  padding: .5rem;
+  padding: .5rem .75rem;
   font-size: 24px;
   border-radius: .5rem;
   border: none;
-
+  flex-grow: 1;
 }
 
 button {
@@ -96,16 +131,25 @@ button {
   font-size: 24px;
   border-radius: .5rem;
   border: none;
-  background: white;
+  background: lightgreen;
+  cursor: pointer;
 }
 
 .page {
   width: 800px;
-  max-width: calc(100vw - 1.5rem);
+  max-width: calc(100vw - 1rem);
 
 }
 
 #stats {
-  padding: 1rem 0;
+  padding: 1.25rem 0;
+  font-size: 18px
 }
 
+a {
+  width: 100%;
+  display: flex;
+  color: white;
+  align-items: center;
+  text-decoration: none;
+}
