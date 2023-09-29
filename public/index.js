@@ -18,8 +18,8 @@ var firstResultToLoad = null;
 
 function onYouTubeIframeAPIReady() {
   player = new YT.Player('player', {
-    height: '390',
-    width: '640',
+    height: '100%',
+    width: '100%',
     videoId: '',
     events: {
       'onReady': function(event) {
@@ -86,7 +86,7 @@ async function search() {
 
   searchSummary.textContent = `Found ${summary.totalQuotes} quotes in ${summary.totalVideos} videos`
 
-  document.getElementById('playerContainer').style.display = 'block'
+  document.getElementById('playerContainer').style.display = 'flex'
 
   resultsDiv.innerHTML = ''
 
@@ -96,20 +96,20 @@ async function search() {
     const videoResults = results[videoId]
     const firstResult = videoResults[0]
     const resultHTML = videoResults.map(result => `
-      <div onclick="goToTimestamp('${result.videoId}', ${result.timestamp})">
-        <strong>Timestamp:</strong> ${new Date(result.timestamp).toISOString().substr(11, 8)} <br>
-        <strong>Context:</strong> ${result.context}
+      <div class="result" onclick="goToTimestamp('${result.videoId}', ${result.timestamp})">
+        <div class="timestamp">${new Date(result.timestamp).toISOString().substr(11, 8)}</div><div class="context">${result.context}</div>
       </div>
     `).join('<br>')
 
     resultsDiv.innerHTML += `
-      <div>
-        <h2>${firstResult.title}</h2>
-        <p>Published on: ${new Date(firstResult.datePublished).toLocaleDateString()}</p>  <!-- Display publication date -->
-        <img src="${firstResult.thumbnail_url}" alt="Thumbnail for ${firstResult.title}">
+      <div class="video">
+        <div class="video-header">
+          <h2>${firstResult.title}</h2>
+          <div class="spacer"></div>
+          <div class="date-published">${new Date(firstResult.datePublished).toLocaleDateString()}</div>
+        </div>
         ${resultHTML}
       </div>
-      <hr>
     `
 
     if (!firstVideoLoaded && !firstResultToLoad) {  // Check if firstResultToLoad is already set

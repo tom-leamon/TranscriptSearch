@@ -86,7 +86,7 @@ app.get('/search', (req, res) => {
                     const searchResult = {
                         videoId: row.videoId,
                         timestamp: entry.offset,
-                        context: context.replace(new RegExp(searchTerm, 'gi'), `<b>${searchTerm}</b>`),
+                        context: context.replace(new RegExp(searchTerm, 'gi'), `<b class="match">${searchTerm}</b>`),
                         title: row.title,
                         thumbnail_url: row.thumbnail_url,
                         datePublished: row.datePublished // Include datePublished field

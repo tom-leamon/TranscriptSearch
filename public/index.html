@@ -4,23 +4,36 @@
   <meta charset="UTF-8">
   <title>Transcript Search</title>
   <script src="https://www.youtube.com/iframe_api"></script>
-  <style>
-    #playerContainer {
-      display: none;
-    }
-  </style>
+  <link rel="stylesheet" href="reset.css">
+  <link rel="stylesheet" href="index.css">
 </head>
 <body>
-  <h1>Transcript Search</h1>
-  <div id="stats">Searching 12,621,357 words in 1,377 hours of 1,925 videos</div>
-  <input type="text" id="searchTerm" placeholder="Enter search term">
-  <button onclick="search()">Search</button>
-  <div id="searchSummary"></div>
+  <div class="page">
+  <div class="center">
+    <h1>Transcript Search</h1>
+  </div>
+
+  <div class="center">
+    <form onsubmit="search(); return false;">
+      <input type="text" id="searchTerm" placeholder="Enter search term" autofocus>
+      <button type="submit">Search</button>
+    </form>
+  </div>
+
+  <div class="center">
+    <div id="stats">Searching 0 words in 0 hours of 0 videos</div>
+  </div>
+ 
   <div id="playerContainer">
     <div id="player"></div>
   </div>
-  <div id="results"></div>
 
+  <div class="center">
+    <div id="searchSummary"></div>
+  </div>
+
+  <div id="results"></div>
+</div>
   <script src="index.js"></script>
 </body>
 </html>
