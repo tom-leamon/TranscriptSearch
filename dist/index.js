@@ -53,7 +53,7 @@ async function fetchAndStoreTranscripts(videoUrls) {
             const videoData = await fetchVideoInfo(videoId);
             let wordCount = 0;
             transcript.forEach((entry) => {
-                wordCount += entry.text.split(' ')?.length || 0;
+                wordCount += entry.text.split(' ').length;
             });
             // Update stats
             db.run(`UPDATE stats SET totalWords = totalWords + ?, totalSeconds = totalSeconds + ?, totalVideos = totalVideos + 1`, [wordCount, videoData.duration]);
